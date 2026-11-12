@@ -1,0 +1,18 @@
+{
+  "schema": "cognitron.web-release.v1",
+  "revision": "d19720d1a9500991b2aafcdc8f7136623de09f99",
+  "knowledge_sha256": "05cd491e2effaafaae04c712463df9820f2b98b5380c26e430fb792cfc712cbe",
+  "public_source_sha256": "f21a4d5816a173e76dd60e361d20619edb6660226f9e0d8541e91e0f8050d0db",
+  "assets": {
+    "index.html": "f576d033f135b79fe2dac8c18075eb5dd2d4e30cef2bb9f07fbd6cdac619aa81",
+    "style.css": "74552e957ff71481ac849c6c2dabd2d77c1edd01b9f462b3e84cfc72d47077b9",
+    "app.js": "92a38ab88098baac6f9fbe1026f69db7c378bbd8bd8ecc8a9031556907747b7b",
+    "delta.js": "3356d06facb0ea46e0ee6670de99bb453b7c7c62d2a0c554e53ae3ab5921f0c0",
+    "privacy.js": "ad4796089aa6bc37e22b9876dbefd087644770add791198f578b5d6619d92cb9",
+    "knowledge.js": "e75ef7f1efcaccf274abcef7f9995b8b3849b80bfe9a8704d19cc79e9ccf1de1",
+    "knowledge-ui.js": "ba87e84ae02c3bcb4d9df2de62fcc8c2bd654a13fb117b42012b04351faa664b",
+    "logo.png": "b76be4f5e24af1b951096f22144f2171378d0e739cc9814b5a61e0567c7a60db",
+    "orkhun.woff2": "0ccb0cf60ca4fdacc2efb11dc4cf6c4c97bace4f64b32c7d7e8dbaf82fe7ee84",
+    "knowledge.generated.js": "6ecbd1d712a9805f522588864928b5a5e400945291334a773f5746aa366e7217"
+  }
+}

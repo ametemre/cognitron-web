@@ -1,0 +1,76 @@
+name: Sync reviewed public website
+on:
+  schedule:
+    - cron: '7,17,27,37,47,57 * * * *'
+  workflow_dispatch:
+    inputs:
+      source_revision:
+        description: 'main to publish; exact source SHA for validation only'
+        default: main
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: cognitron-public-website
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    outputs:
+      publish: ${{ steps.release.outputs.publish }}
+    steps:
+      - name: Validate source selection
+        env:
+          SOURCE_REF: ${{ inputs.source_revision || 'main' }}
+        run: '[[ "$SOURCE_REF" == main || "$SOURCE_REF" =~ ^[0-9a-f]{40}$ ]]'
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ametemre/Cognitron
+          ref: ${{ inputs.source_revision || 'main' }}
+          ssh-key: ${{ secrets.COGNITRON_SOURCE_READ_KEY }}
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /web/hero-preview/
+            /web/knowledge/public.json
+            /web/tests/knowledge-release.test.cjs
+            /scripts/build_web_release.cjs
+      - name: Verify web behavior and build fixed public assets
+        id: release
+        env:
+          SOURCE_REF: ${{ inputs.source_revision || 'main' }}
+          PUBLICATION_ENABLED: ${{ vars.WEB_PUBLICATION_ENABLED }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          revision=$(git rev-parse HEAD)
+          echo "Source revision: $revision"
+          node --test --test-reporter=dot web/hero-preview/delta.test.cjs web/hero-preview/privacy.test.cjs web/tests/knowledge-release.test.cjs
+          node scripts/build_web_release.cjs --revision "$revision" --out dist/web
+          publish=false
+          if [ "$SOURCE_REF" = main ] && [ "$PUBLICATION_ENABLED" = true ]; then
+            live_revision=$(curl --fail --silent --show-error --max-time 20 https://cognitron.io/release.json | jq -r '.revision' || true)
+            if [ "$revision" != "$live_revision" ]; then publish=true; fi
+          fi
+          echo "publish=$publish" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4
+        with:
+          path: dist/web
+          retention-days: 1
+  deploy:
+    if: needs.build.outputs.publish == 'true'
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy complete public package
+        id: deployment
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4
